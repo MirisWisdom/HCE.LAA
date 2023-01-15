@@ -35,11 +35,21 @@ namespace Miris.HCE.LAA
     {
       var fileInfo = new FileInfo(executable.File);
 
+      /* Preserve time-related file metadata. */
+      var creationTime   = fileInfo.CreationTime;
+      var lastWriteTime  = fileInfo.LastWriteTime;
+      var lastAccessTime = fileInfo.LastAccessTime;
+
       WriteLine($"PATCH [{BitConverter.ToString(Data.ToArray())}] > 0x{Offset:X} > FILE '{fileInfo.Name}'");
 
       using BinaryWriter bw = new(fileInfo.OpenWrite());
       bw.BaseStream.Seek(Offset, Begin);
       bw.Write(Data.ToArray());
+
+      /* Apply original time-related file metadata. */
+      fileInfo.CreationTime   = creationTime;
+      fileInfo.LastWriteTime  = lastWriteTime;
+      fileInfo.LastAccessTime = lastAccessTime;
     }
   }
 }
